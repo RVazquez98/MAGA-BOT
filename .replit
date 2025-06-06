@@ -1,11 +1,12 @@
+language = "nodejs"
 modules = ["nodejs-20"]
-run = "npm run dev"
+run = "npm run build && npm start"
 
 [nix]
 channel = "stable-24_05"
 
 [deployment]
-run = ["sh", "-c", "npm run dev"]
+run = ["sh", "-c", "npm run build && npm start"]
 
 [workflows]
 runButton = "Build and Start"
