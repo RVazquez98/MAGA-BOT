@@ -16,28 +16,24 @@ function getEquivalentItemTypes(type: string): string[] {
 }
 
 export async function getAlbionItemBestPrice(type: string): Promise<number> {
-  const equivalents = getEquivalentItemTypes(type);
+  const res = await fetch(`${PRICE_API}${type}.json`);
+  let priceData;
+  try {
+    priceData = await res.json();
+  } catch (e) {
+    // Si la respuesta no es JSON, probablemente es un throttle
+    return 0;
+  }
   let minPrice = 0;
-
-  for (const eqType of equivalents) {
-    const res = await fetch(`${PRICE_API}${eqType}.json`);
-    let priceData;
-    try {
-      priceData = await res.json();
-    } catch (e) {
-      // Si la respuesta no es JSON, probablemente es un throttle
-      return 0;
-    }
-    if (Array.isArray(priceData)) {
-      for (const entry of priceData) {
-        if (entry.sell_price_min > 0 && (minPrice === 0 || entry.sell_price_min < minPrice)) {
-          minPrice = entry.sell_price_min;
-        }
+  if (Array.isArray(priceData)) {
+    for (const entry of priceData) {
+      if (entry.sell_price_min > 0 && (minPrice === 0 || entry.sell_price_min < minPrice)) {
+        minPrice = entry.sell_price_min;
       }
     }
-    // Opcional: espera un poco para evitar throttle
-    await new Promise(r => setTimeout(r, 100));
   }
+  // Opcional: espera un poco para evitar throttle
+  await new Promise(r => setTimeout(r, 100));
   return minPrice;
 }
 
